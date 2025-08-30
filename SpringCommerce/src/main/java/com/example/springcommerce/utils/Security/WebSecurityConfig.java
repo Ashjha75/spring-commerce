@@ -126,7 +126,7 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Configure allowed origins - CHANGE IN PRODUCTION!
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "https://yourdomain.com"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "https://mydomain.com"));
 
         // Allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -161,17 +161,11 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF for stateless API
                 .csrf(csrf -> csrf.disable())
-
-                // Enable CORS with our configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Configure exception handling
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(unauthorizedHandler))
-
-                // Stateless session management for JWT
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -203,10 +197,7 @@ public class WebSecurityConfig {
                 // Security headers configuration
                 .headers(headers -> headers
                         // Prevent clickjacking attacks
-                        .frameOptions().deny()
-
-                        // Prevent MIME type sniffing
-                        .contentTypeOptions().and()
+                        .frameOptions(options -> options.deny())
 
                         // HSTS for HTTPS enforcement
                         .httpStrictTransportSecurity(hstsConfig ->
@@ -217,7 +208,9 @@ public class WebSecurityConfig {
                         )
 
                         // Content Security Policy
-                        .contentSecurityPolicy("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'")
+                        .contentSecurityPolicy(csp ->
+                                csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'")
+                        )
                 );
 
         // Set custom authentication provider
@@ -248,3 +241,14 @@ public class WebSecurityConfig {
         ));
     }
 }
+//---
+//config:
+//theme: neo-dark
+//layout: elk
+//---
+//flowchart TD
+//A["WebSecurityConfig"] --> B["SecurityFilterChain - Basic"] & C["AuthenticationManager"] & D["PasswordEncoder - BCrypt"] & E["DaoAuthenticationProvider"] & F["AuthTokenFilter"] & G["WebSecurityCustomizer"]
+//B --> H["CSRF: DISABLED ✅"] & I["CORS: ENABLED ✅"] & J["Session: STATELESS ✅"] & K["Exception Handling: Basic"] & L["Authorization: Basic Rules"] & M["Security Headers: STRONG ✅"]
+//L --> N["/api/auth/** - PERMIT"] & O["/swagger-ui/** - PERMIT"] & P["anyRequest - authenticated()"]
+//K --> Q["AuthEntryPointJwt"]
+//M --> R["frameOptions: sameOrigin"] & S["XSS Protection: block"] & T["Content Security Policy: default-src self"] & U["Referrer Policy: strictOriginWhenCrossOrigin"]

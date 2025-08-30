@@ -37,6 +37,9 @@ import java.io.IOException;
  * - SecurityContext and SecurityContextHolder
  * - Stateless vs Stateful authentication
  */
+
+//extracts JWT tokens, validates them, and sets up Spring Security context for authorization.
+
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
@@ -47,6 +50,27 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+
+    /**
+     * Why is field injection preferred for servlet filters like AuthTokenFilter?
+     *
+     * <p>
+     * Although constructor injection is the recommended approach for most Spring components,
+     * servlet filters have unique instantiation requirements:
+     * </p>
+     * <ul>
+     *   <li><b>Filter Lifecycle:</b> Filters are often created by the servlet container and then managed by Spring.</li>
+     *   <li><b>Spring Security Integration:</b> Security configuration may instantiate filters programmatically, making constructor injection impractical.</li>
+     *   <li><b>Circular Dependencies:</b> Filters may depend on beans that could introduce circular dependencies, which field injection can resolve.</li>
+     *   <li><b>Framework Convention:</b> Spring Security documentation and examples typically use field injection for filters.</li>
+     * </ul>
+     * <p>
+     * <b>Note:</b> When using <code>new AuthTokenFilter()</code> in configuration, constructor injection cannot be used.
+     * Field injection ensures dependencies are set by the Spring container after instantiation.
+     * </p>
+     */
+
+
 
     /**
      * Core filter method that processes each HTTP request for JWT authentication.
@@ -145,7 +169,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         String headerAuth = request.getHeader("Authorization");
         logger.debug("Checking Authorization header for JWT");
 
-        // REMOVED: System.out.println - NEVER use in production!
 
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             String token = headerAuth.substring(7).trim();
@@ -166,3 +189,26 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         return null;
     }
 }
+
+//---
+//config:
+//theme: neo-dark
+//layout: elk
+//---
+//flowchart TD
+//A["Incoming HTTP Request"] --> B["AuthTokenFilter doFilterInternal"]
+//B --> C["Extract JWT - parseJwt request"]
+//C -- Authorization Header Bearer token --> D["JWT from header"]
+//C -- Cookie fallback --> E["JWT from cookies"]
+//C -- Not found --> F["Return null"]
+//D --> G["Validate JWT - jwtUtils.validateJwtToken"]
+//E --> G
+//F --> M["Continue filter chain - filterChain.doFilter"]
+//G -- Valid --> H["Extract username from token"]
+//G -- Invalid --> M
+//H --> I["Load UserDetails from DB"]
+//I --> J["Create UsernamePasswordAuthenticationToken"]
+//J --> K["Set authentication details from request"]
+//K --> L["Save authentication in SecurityContextHolder"]
+//L --> M
+//
