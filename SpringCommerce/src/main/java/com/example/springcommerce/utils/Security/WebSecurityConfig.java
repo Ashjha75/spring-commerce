@@ -24,16 +24,16 @@ import java.util.Arrays;
 
 /**
  * Comprehensive Spring Security configuration for JWT-based authentication.
- *
+ * <p>
  * WHY: Centralized security configuration ensures consistent security policies
  * across the entire application and provides defense in depth.
- *
+ * <p>
  * WHAT: Configures authentication, authorization, session management,
  * CORS, security headers, and exception handling.
- *
+ * <p>
  * HOW: Uses Spring Security's builder pattern to configure security filters,
  * authentication providers, and security policies declaratively.
- *
+ * <p>
  * INTERVIEW POINTS:
  * - Spring Security architecture and filter chain
  * - Stateless vs stateful session management
@@ -46,18 +46,17 @@ import java.util.Arrays;
 public class WebSecurityConfig {
 
     private final AuthEntryPointJwt unauthorizedHandler;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    public WebSecurityConfig(AuthEntryPointJwt unauthorizedHandler) {
+    public WebSecurityConfig(AuthEntryPointJwt unauthorizedHandler, UserDetailsServiceImpl userDetailsService) {
         this.unauthorizedHandler = unauthorizedHandler;
+        this.userDetailsService = userDetailsService;
     }
 
     /**
      * Creates JWT authentication filter bean.
-     *
+     * <p>
      * WHY: Filter needs to be a Spring-managed bean for dependency injection
      * and proper lifecycle management.
      */
@@ -68,7 +67,7 @@ public class WebSecurityConfig {
 
     /**
      * Configures DAO authentication provider with user details service and password encoder.
-     *
+     * <p>
      * WHY: Spring Security needs to know how to authenticate users
      * (load user details and verify passwords).
      *
@@ -84,10 +83,10 @@ public class WebSecurityConfig {
 
     /**
      * Password encoder bean using BCrypt hashing algorithm.
-     *
+     * <p>
      * WHY: Passwords should never be stored in plain text.
      * BCrypt is a strong, adaptive hashing function designed for passwords.
-     *
+     * <p>
      * INTERVIEW POINTS:
      * - Why BCrypt over MD5/SHA1
      * - Salt and its importance
@@ -111,10 +110,10 @@ public class WebSecurityConfig {
 
     /**
      * CORS configuration for cross-origin requests.
-     *
+     * <p>
      * WHY: Web applications often need to make requests from different domains.
      * CORS policy controls which origins can access the API.
-     *
+     * <p>
      * SECURITY CONSIDERATIONS:
      * - Don't use wildcards (*) in production
      * - Specify exact allowed origins
@@ -152,7 +151,7 @@ public class WebSecurityConfig {
 
     /**
      * Main security filter chain configuration.
-     *
+     * <p>
      * WHY: This is the heart of Spring Security configuration where
      * all security policies are defined and enforced.
      *
@@ -232,7 +231,7 @@ public class WebSecurityConfig {
 
     /**
      * Customize web security to ignore certain paths completely.
-     *
+     * <p>
      * WHY: Some resources don't need any security processing at all
      * for performance reasons.
      */

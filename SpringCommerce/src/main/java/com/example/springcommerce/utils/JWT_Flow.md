@@ -115,3 +115,24 @@ sequenceDiagram
 | **`UserDetailsServiceImpl.java`** | **The Librarian**. Connects Spring Security to your user database. When asked for a user by username, it looks them up in the database and returns their details. |
 | **`AuthEntryPointJwt.java`** | **The Bouncer**. If an unauthenticated user tries to access a private resource, this class catches the error and sends back a clean `401 Unauthorized` error. |
 | **`AuthUtil.java`** | **The Information Desk**. A simple helper for your controllers to easily ask, "Who is the user that made this request?" |
+
+
+---
+
+---
+1. WebSecurityConfig.java (Start Here)
+   This is your entry point - it configures the entire security setup and shows how all components work together.
+
+2. UserDetailsServiceImpl.java
+   Understand how users are loaded from the database for authentication.
+
+3. JwtUtils.java
+   Learn how JWTs are created, validated, and parsed.
+
+4. AuthTokenFilter.java
+   See how incoming requests are filtered and authenticated using JWT.
+
+5. AuthEntryPointJwt.java
+   Understand how authentication failures are handled.
+
+6. AuthUtil.java
